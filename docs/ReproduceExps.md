@@ -219,6 +219,7 @@ python script/run.py --config-dir=cfg/robomimic/eval/transport --config-name=eva
 <div align="center">
   <img src="../sample_figs/denoise_step.png" alt="Evaluation Output" width="60%">
 </div>
+
 - **What to record videos?** For Gym, Robomimic, and Franka Kitchen, you can change the `self.record_video=True` in the corresponding evaluation script and set `self.record_env_index` to the environment id that you wish to record. You can also specify the height and width of your video by changing the values of `self.frame_width` and `self.frame_height`. Then after running the evaluation script, you will see a .mp4 file under your output directory along with your plot! Below, we provide an example video (converted to .gif), which records Fine-tuned Shortcut Flow in Robomimic-can environment, inferred at 1 denoising steps. 
 
 <div align="center">
