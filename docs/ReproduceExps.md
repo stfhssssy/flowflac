@@ -216,7 +216,12 @@ python script/run.py --config-dir=cfg/robomimic/eval/transport --config-name=eva
   - Can’t set `denoising_step_list`? Add it to your config file.
   - Clear other processes on your machine for accurate timing.
 - **Output:** Saves a `.png` plot and data files for later use. Example: <img src="../sample_figs/denoise_step.png" alt="Evaluation Output" width="60%">
-- **What to record videos?** For Gym, Robomimic, and Franka Kitchen, you can change the `self.record_video=True` in the corresponding evaluation script and set `self.record_env_index` to the environment id that you wish to record. You can also specify the height and width of your video by changing the values of `self.frame_width` and `self.frame_height`. Then after running the evaluation script, you will see a .mp4 file under your output directory along with your plot!
+- **What to record videos?** For Gym, Robomimic, and Franka Kitchen, you can change the `self.record_video=True` in the corresponding evaluation script and set `self.record_env_index` to the environment id that you wish to record. You can also specify the height and width of your video by changing the values of `self.frame_width` and `self.frame_height`. Then after running the evaluation script, you will see a .mp4 file under your output directory along with your plot! Below, we provide an example video, which records Fine-tuned Shortcut Flow in Robomimic-can environment, inferred at 1 denoising steps. 
+<!-- <video src="sample_figs/ShortCutFlow_can_step1_1080_1920.mp4" controls title="Fine-tuned Shortcut Flow in Robomimic-can at 1 denoising step"></video> -->
+<video width="1080" height="1920" controls>
+  <source src="sample_figs/ShortCutFlow_can_step1_1080_1920.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 - **Warning** If you trained a flow matching policy with ReinFlow, typically we will clip the denoised actions during fine-tuning. Therefore, we recommend you turn on `self.clip_intermediate_actions=True` in your evaluation script. Otherwise the reward may drop. 
 
