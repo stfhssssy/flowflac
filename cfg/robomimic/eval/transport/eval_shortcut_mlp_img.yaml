@@ -41,6 +41,7 @@ normalization_path: ${oc.env:REINFLOW_DATA_DIR}/robomimic/${env_name}-img/normal
 load_ema: true
 seed: 42
 device: cuda:0
+sim_device: cuda:0
 denoising_steps: 20 #100
 denoising_step_list: [1, 2, 4, 5, 8, 16, 32, 64, 128]
 n_steps: 200  # each episode takes max_episode_steps / act_steps steps
