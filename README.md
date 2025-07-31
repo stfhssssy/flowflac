@@ -8,9 +8,11 @@
 <!-- links: -->
 <hr>
 
-<div align="center">
-  <img src="./sample_figs/ShortCutFlow_can_step1_1080_1920.gif" title="Fine-tuned Shortcut Flow in Robomimic-can at 1 denoising step" width="65%">
+<div style="display: flex; justify-content: center; align-items: center; gap: 0;">
+  <img src="./sample_figs/theorem.png" title="Theorem Illustration" style="width: 47.5%; height: auto; margin: 0;" />
+  <img src="./sample_figs/ShortCutFlow_can_step1_1080_1920.gif" title="Fine-tuned Shortcut Flow in Robomimic-can at 1 denoising step" style="width: 47.5%; height: auto; margin: 0;" />
 </div>
+<br><br>
 
 <div align="center">
   <a href="https://reinflow.github.io/" target="_blank">
