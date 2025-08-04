@@ -42,6 +42,36 @@
   <a href="#acknowledgement">Acknowledgement</a>
 </p>
 
+
+
+## 🚀 About ReinFlow
+
+This is the official implementation of _"ReinFlow: Fine-tuning Flow Matching Policy with Online Reinforcement Learning"_.
+
+**ReinFlow** is a flexible **policy gradient framework** for fine-tuning **flow matching policies** at **any denoising step**.
+
+How does it work?  
+👉 First, train flow policies using **imitation learning** (behavior cloning).  
+👉 Then, fine-tune them with **online reinforcement learning** using ReinFlow!
+
+🧩 **Supports**:
+- ✅ 1-Rectified Flow  
+- ✅ Shortcut Models  
+- ✅ Any other policy defined by ODEs (in principle)
+
+📈 **Empirical Results**: ReinFlow achieves strong performance across a variety of robotic tasks:
+- 🏃‍♂️ Locomotion (OpenAI Gym)  
+- 🧠 State-based manipulation (Franka Kitchen)  
+- 👀 Visual manipulation (Robomimic)
+
+🧠 **Key Innovation**: ReinFlow trains a **noise injection network** end-to-end:
+- ✅ Makes policy probabilities tractable, even with **very few denoising steps** (e.g., 4, 2, or 1)  
+- ✅ Robust to discretization and Monte Carlo approximation errors
+
+Learn more on our 🔗 [project website](https://reinflow.github.io/) or check out the [arXiv paper](https://arxiv.org/abs/...).
+
+
+
 ## :loudspeaker: News
 * [2025/07/30] Fixed the rendering bug in Robomimic. Now supports rendering at 1080p resolution. 
 * [2025/07/29] Add tutorial on how to record videos during evaluation in the [docs](docs/ReproduceExps.md)
