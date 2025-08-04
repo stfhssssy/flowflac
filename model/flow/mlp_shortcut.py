@@ -60,8 +60,7 @@ from model.common.modules import SpatialEmb, RandomShiftsAug
 from model.common.vit import VitEncoder
 log = logging.getLogger(__name__)
 import einops
-from typing import Tuple
-from util.process import is_multiple_of_one_over_k
+from typing import Tuple, List
 
 class ShortCutFlowMLP(nn.Module):
     def __init__(
@@ -77,7 +76,7 @@ class ShortCutFlowMLP(nn.Module):
         use_layernorm=False,
         residual_style=False,
         embed_combination_type='add' #, multiply or concate.   cond_embed + td_embed or cond_embed x td_embed or [cond_embed, td_embed]
-    ):
+        ):
         super().__init__()
         self.td_emb_dim = td_emb_dim # for both time and step
         self.act_dim_total = action_dim * horizon_steps
@@ -139,7 +138,7 @@ class ShortCutFlowMLP(nn.Module):
         dt: Tensor,
         cond: dict,
         output_embedding=False
-    ):
+        ):
         """
         Inputs:
             action: (B, Ta, Da) - Current action trajectory
@@ -175,7 +174,33 @@ class ShortCutFlowMLP(nn.Module):
         if output_embedding:
             return vel_flat.view(B, Ta, Da), td_emb, cond_emb
         return vel_flat.view(B, Ta, Da)
+    
+    def sample_action(self,cond:dict,inference_steps:int,clip_intermediate_actions:bool,act_range:List[float], z:Tensor=None,save_chains:bool=False):
+        """
+        simply return action via integration (Euler's method). the initial noise could be specified. 
+        when `save_chains` is True, also return the denoising trajectory.
+        """
+        B = cond['state'].shape[0]
+        device=cond['state'].device
 
+        x_hat:Tensor=z if z is not None else torch.randn(B, self.horizon_steps, self.action_dim, device=device)
+        if save_chains:
+            x_chain=torch.zeros((B, inference_steps+1, self.horizon_steps, self.action_dim), device=device)
+        dt = (1 / inference_steps) * torch.ones_like(x_hat, device=device)
+        steps = torch.linspace(0, 1, inference_steps, device=device).repeat(B, 1)
+        for i in range(inference_steps):
+            t = steps[:, i]
+            dt_batch = (1 / inference_steps) * torch.ones(B, device=device)
+            vt = self.forward(action=x_hat, time=t, dt=dt_batch, cond=cond, output_embedding=False)
+            x_hat += vt * dt
+            if clip_intermediate_actions or i == inference_steps-1: # always clip the output action. appended by Tonghe on 04/25/2025
+                x_hat = x_hat.clamp(*act_range)
+            if save_chains:
+                x_chain[:, i+1] = x_hat
+        if save_chains:
+            return x_hat, x_chain
+        return x_hat
+    
 class ShortCutFlowViT(nn.Module):
     """With ViT backbone and Transformer-based shortcut flow
     
@@ -430,6 +455,31 @@ class ShortCutFlowViT(nn.Module):
             return velocity.view(B, Ta, Da), td_emb, cond_emb
         return velocity.view(B, Ta, Da)
     
+    def sample_action(self,cond:dict,inference_steps:int,clip_intermediate_actions:bool,act_range:List[float], z:Tensor=None,save_chains:bool=False):
+        """
+        simply return action via integration (Euler's method). the initial noise could be specified. 
+        when `save_chains` is True, also return the denoising trajectory.
+        """
+        B = cond['state'].shape[0]
+        device=cond['state'].device
+
+        x_hat:Tensor=z if z is not None else torch.randn(B, self.horizon_steps, self.action_dim, device=device)
+        if save_chains:
+            x_chain=torch.zeros((B, inference_steps+1, self.horizon_steps, self.action_dim), device=device)
+        dt = (1 / inference_steps) * torch.ones_like(x_hat, device=device)
+        steps = torch.linspace(0, 1, inference_steps, device=device).repeat(B, 1)
+        for i in range(inference_steps):
+            t = steps[:, i]
+            dt_batch=(1 / inference_steps)* torch.ones(B, device=device)
+            vt = self.forward(action=x_hat, time=t, dt=dt_batch, cond=cond, output_embedding=False)
+            x_hat += vt * dt
+            if clip_intermediate_actions or i == inference_steps-1: # always clip the output action. appended by Tonghe on 04/25/2025
+                x_hat = x_hat.clamp(*act_range)
+            if save_chains:
+                x_chain[:, i+1] = x_hat
+        if save_chains:
+            return x_hat, x_chain
+        return x_hat
 
 from model.flow.mlp_flow import NoisyFlowMLP, ExploreNoiseNet
 class NoisyShortCutFlowMLP(NoisyFlowMLP):
