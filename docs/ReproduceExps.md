@@ -1,9 +1,24 @@
-# Your Friendly Guide to Reproducing Experiments
+# Your Friendly Guide to Reproducing Our Experiments
 
 Welcome! This guide will walk you through setting up and running experiments. 
 
 It’s split into clear steps: getting datasets, downloading checkpoints, running experiments, and some handy tips. Let’s make this as smooth as possible. 
 
+## 📂 Before you begin...
+
+To avoid import errors and ensure smooth execution, run all commands from the root directory of the ReinFlow repository.
+
+Your directory should look like this:
+
+```bash
+ReinFlow/
+├── agent/
+├── cfg/
+├── script/
+├── util/
+└── ...
+```
+Please double-check that your working directory matches this structure.
 
 ## 1. Getting and Preparing Datasets for Pre-training
 **Should I read this section?**
