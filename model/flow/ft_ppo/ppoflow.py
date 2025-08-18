@@ -327,7 +327,7 @@ class PPOFlow(nn.Module):
         # when doing deterministic sampling should calculate logprob again.
         B=cond["state"].shape[0]
         dt = (1/self.inference_steps)* torch.ones(B, self.horizon_steps, self.action_dim, device=self.device)
-        steps = torch.linspace(0,1,self.inference_steps).repeat(B, 1).to(self.device)  # [batchsize, num_steps]
+        steps = torch.linspace(0, 1-1/self.inference_steps,self.inference_steps).repeat(B, 1).to(self.device)  # [batchsize, num_steps]
         if save_chains:
             x_chain=torch.zeros((B, self.inference_steps+1, self.horizon_steps, self.action_dim), device=self.device)
         if ret_logprob:

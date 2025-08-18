@@ -149,7 +149,7 @@ class FlowMLP(nn.Module):
         if save_chains:
             x_chain=torch.zeros((B, inference_steps+1, self.horizon_steps, self.action_dim), device=device)
         dt = (1 / inference_steps) * torch.ones_like(x_hat, device=device)
-        steps = torch.linspace(0, 1, inference_steps, device=device).repeat(B, 1)
+        steps = torch.linspace(0, 1-1 / inference_steps, inference_steps, device=device).repeat(B, 1)
         for i in range(inference_steps):
             t = steps[:, i]
             vt = self.forward(x_hat, t, cond)
@@ -349,7 +349,7 @@ class NoisyFlowMLP(nn.Module):
         '''
         self.logprob_noise_levels = torch.zeros(self.denoising_steps, device=self.device, requires_grad=False)
         
-        steps = torch.linspace(0, 1, self.denoising_steps, device=self.device)
+        steps = torch.linspace(0, 1-1 /self.denoising_steps, self.denoising_steps, device=self.device)
         for i, t in enumerate(steps):
             if force_level:
                 self.logprob_noise_levels[i] = torch.tensor(force_level, device=self.device)

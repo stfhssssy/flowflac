@@ -195,7 +195,7 @@ class ReFlow(nn.Module):
             x_hat_list = torch.zeros((inference_steps,) + self.data_shape, device=self.device)
         x_hat = z if z is not None else torch.randn((B,) + self.data_shape, device=self.device)
         dt = (1 / inference_steps) * torch.ones_like(x_hat, device=self.device)
-        steps = torch.linspace(0, 1, inference_steps, device=self.device).repeat(B, 1)
+        steps = torch.linspace(0, 1-1/inference_steps, inference_steps, device=self.device).repeat(B, 1)
         for i in range(inference_steps):
             t = steps[:, i]
             vt = self.network(x_hat, t, cond)
