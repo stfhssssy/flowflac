@@ -28,7 +28,10 @@
     <img alt="Docs" src="https://img.shields.io/badge/Read-Docs-purple?style=for-the-badge" />
   </a>
   <a href="https://huggingface.co/datasets/ReinFlow/ReinFlow-data-checkpoints-logs/" target="_blank">
-    <img alt="Checkpoints" src="https://img.shields.io/badge/Download-Checkpoints-orange?style=for-the-badge" />
+    <img alt="Checkpoints" src="https://img.shields.io/badge/HuggingFace-Checkpoints-orange?style=for-the-badge" />
+  </a>
+  <a href="https://wandb.ai/reinflow/projects/" target="_blank">
+    <img alt="Checkpoints" src="https://img.shields.io/badge/WandB-Logs-yellow?style=for-the-badge" />
   </a>
   <!-- <a href="" target="_blank">
     <img alt="X" src="https://img.shields.io/badge/View-X_post-black?style=for-the-badge" />
