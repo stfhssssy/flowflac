@@ -8,11 +8,12 @@ This document records all the steps needed to install packages related to reprod
 You are free to skip this part if you are satisfied with the speed of python package downloading. 
 Otherwise, if you want to use THU TUNA as the conda source, please refer to Section 1. in [reinflow-setup-verbose.md](reinflow-setup-verbose.md). Other sources are also acceptable. 
 
-* Create environment
+* Create environment and download repository
 ```bash
 # create environment
 conda create -n reinflow python=3.8 -y
 conda activate reinflow
+gh repo clone ReinFlow/ReinFlow
 # rename your repo folder as ReinFlow
 # (omitted)
 ```
@@ -41,16 +42,16 @@ conda activate reinflow
 pip install 'cython<3.0.0' -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # if you don't have root privilege or cannot update the driver (e.g. in a container)
-pip install patchelf
-conda install -c conda-forge glew
-conda install -c conda-forge mesalib
-conda install -c menpo glfw3
-echo -e 'CPATH=$CONDA_PREFIX/include' >> ~/.bashrc
-source ~/.bashrc
+  pip install patchelf
+  conda install -c conda-forge glew
+  conda install -c conda-forge mesalib
+  conda install -c menpo glfw3
+  echo -e 'CPATH=$CONDA_PREFIX/include' >> ~/.bashrc
+  source ~/.bashrc
 # else, if you have root privilege: 
-sudo apt-get install patchelf
-sudo apt-get install python3-dev build-essential libssl-dev libffi-dev libxml2-dev  
-sudo apt install libosmesa6-dev libgl1-mesa-glx libglfw3
+  sudo apt-get install patchelf
+  sudo apt-get install python3-dev build-essential libssl-dev libffi-dev libxml2-dev  
+  sudo apt install libosmesa6-dev libgl1-mesa-glx libglfw3
 
 # install mujoco-py
 cd ~/.mujoco/mujoco-py
@@ -165,7 +166,8 @@ These commands specify the paths to your logging directory, data folders and cre
 cd ~/ReinFlow 
 conda activate reinflow
 bash ./script/set_path.sh  # set log, data, and env paths. # wandb entity: 
-source ~/.bashrc
+source ~/.bashrc  # save the changes and activate them in the current terminal. 
+conda activate reinflow
 ```
 
 ### 7.Install ReinFlow package
@@ -179,9 +181,7 @@ pip install -e .
 If you want to obtain the training record of our experiments, consider download the visualize folder from our repository and put the contents in your `<REINFLOW_DIR>/visualize`
 
 
-
-
-### Other problems you may meet
+### 9. Other problems you may meet
 * cannot find /util
 This mean you have not yet installed the reinflow package. Please return to `7. Install ReinFlow package`. 
 If you meet problems installing this package, or refuse to install it, we also provide a workaround: insert the following code beofre your [script/run.py](/script/run.py): 
