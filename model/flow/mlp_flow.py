@@ -199,7 +199,7 @@ class ExploreNoiseNet(nn.Module):
         noise_logvar    = self.mlp_logvar(noise_feature)
         noise_std       = self.process_noise(noise_logvar)
         return noise_std
-
+  
     def process_noise(self, noise_logvar):
         '''
         input:

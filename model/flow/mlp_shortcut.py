@@ -47,7 +47,7 @@
 # and revised by ReinFlow Authors and Collaborators.
 # The ShortCutFlowViT scipt is extended from Diffusion Policy Policy Optimization's implementation. 
 # NoisyShortCutFlowMLP and NoisyShortCutFlowViT are composed by ReinFlow Authors.
-
+  
 import torch
 import torch.nn as nn
 import numpy as np
