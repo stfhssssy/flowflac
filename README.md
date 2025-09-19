@@ -2,7 +2,7 @@
 # ReinFlow: Fine-tuning Flow Matching Policy with Online Reinforcement Learning
 
 ### 💐 Paper accepted at <span style="color:red;">NeurIPS 2025</span></span>
-
+  
 <!-- schematic: -->
 <p align="center">
   <img src="sample_figs/schematic.png" alt="Architecture Diagram" width="90%">
