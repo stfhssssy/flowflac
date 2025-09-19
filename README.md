@@ -123,8 +123,8 @@ Please refer to [KnownIssues.md](docs/KnownIssues.md) to see how to resolve erro
 ## :star: Todo
 - [ ] Support fine-tuning [Mean Flow](https://arxiv.org/abs/2505.13447) with online RL
 - [ ] Release videos
-- [x] Release the WandB projects via a corporate account
-- [x] Release Docs
+- [x] Release WandB metrics
+- [x] Release docs
 - [x] Release checkpoints
 - [x] Release codebase
 
