@@ -3,9 +3,9 @@
 
 ### 💐 Paper accepted at <span style="color:red;">NeurIPS 2025</span></span>
 
-[Tonghe Zhang](https://tonghe-zhang.github.io/)$^1$, [Chao Yu](https://nicsefc.ee.tsinghua.edu.cn/people/ChaoYu)$^2$, [Sichang Su](https://destiny000621.github.io/)$^3$, [Yu Wang](https://nicsefc.ee.tsinghua.edu.cn/people/YuWang)$^2$
+[Tonghe Zhang](https://tonghe-zhang.github.io/)$^1$, [Chao Yu](https://nicsefc.ee.tsinghua.edu.cn/people/ChaoYu)$^{2,3}$, [Sichang Su](https://destiny000621.github.io/)$^4$, [Yu Wang](https://nicsefc.ee.tsinghua.edu.cn/people/YuWang)$^2$
 
-$^1$ Carnegie Mellon University  $^2$ Tsinghua University  $^3$ University of Texas at Austin
+$^1$ Carnegie Mellon University  $^2$ Tsinghua University $^3$ Beijing Zhongguancun Academy  $^4$ University of Texas at Austin
 
 <div align="center">
   <a href="https://reinflow.github.io/" target="_blank">
