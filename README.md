@@ -49,9 +49,6 @@ $^1$ Carnegie Mellon University  $^2$ Tsinghua University $^3$ Beijing Zhongguan
 <hr>
 
 
-
-
-
 <!-- mini table of contents: -->
 <p align="center">
   <a href="#rocket-installation">Installation</a> |
@@ -70,6 +67,9 @@ $^1$ Carnegie Mellon University  $^2$ Tsinghua University $^3$ Beijing Zhongguan
 This is the official implementation of _"ReinFlow: Fine-tuning Flow Matching Policy with Online Reinforcement Learning"_.  
 
 If you like our work, we'll be happy if you give us a star **:star:**!
+
+
+🔥 **<u>ReinFlow can now scale to fine-tune 3B VLA models like $\pi_0$ via massively parallel RL.</u>**
 
 
 ## 🚀 About ReinFlow
