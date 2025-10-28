@@ -126,9 +126,9 @@ Please refer to [Custom.md](docs/Custom.md).
 Please refer to [KnownIssues.md](docs/KnownIssues.md) to see how to resolve errors you encounter.
 
 ## :star: Todo
-- [ ] Release [Pi0](https://arxiv.org/pdf/2410.24164v1) fine-tuning results.
 - [ ] Support fine-tuning [Mean Flow](https://arxiv.org/abs/2505.13447) with online RL
 - [ ] Release videos
+- [x] Release [pi0, pi0.5](https://arxiv.org/pdf/2410.24164v1) fine-tuning results.
 - [x] Release WandB metrics
 - [x] Release docs
 - [x] Release checkpoints
