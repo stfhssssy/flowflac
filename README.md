@@ -64,7 +64,7 @@ This is the official implementation of _"ReinFlow: Fine-tuning Flow Matching Pol
 If you like our work, we'll be happy if you give us a star **:star:**!
 
 
-🔥 **<u>ReinFlow can now scale to fine-tune 3B VLA models like $\pi_0$ via massively parallel RL.</u>**
+🔥 **<u>ReinFlow now scales to fine-tune 3B VLA models like $\pi_0, \pi_{0.5}$ via massively parallel RL.</u>**
 
 
 ## :loudspeaker: News
