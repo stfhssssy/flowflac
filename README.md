@@ -68,8 +68,9 @@ If you like our work, we'll be happy if you give us a star **:star:**!
 
 
 ## :loudspeaker: News
-* [2025/10/16] **We scaled up ReinFlow to fine-tune large VLA like $\pi_0, \pi_{0.5}$.**
-  Code, hyperparamters in LIBERO environment released at [RLinf](https://rlinf.readthedocs.io/en/latest/rst_source/examples/pi0.html). 
+* **[2025/10/16]** We scaled up **ReinFlow** to fine-tune VLA models such as **$\pi_0$** and **$\pi_{0.5}$**.  
+  The code, hyperparameters for the LIBERO environment, and ManiSkill results are available at [**RLinf**](https://rlinf.readthedocs.io/en/latest/rst_source/examples/pi0.html).
+
 * [2025/09/18] Paper accepted at [NeurIPS 2025](https://neurips.cc/virtual/2025/poster/119473). 
 * [2025/08/18] All training metrics (losses, reward, etc) released in [WandB](https://wandb.ai/reinflow/projects) to help you reproduce our results. 
 * [2025/07/30] Fixed the rendering bug in Robomimic. Now supports rendering at 1080p resolution. 
