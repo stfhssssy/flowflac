@@ -118,7 +118,7 @@ Please refer to [KnownIssues.md](docs/KnownIssues.md) to see how to resolve erro
 
 ## :rocket: Tips on Hyperparameter Tuning
 After training flow policies with RL in multiple benchmarks (OpenAI Gym, Franka Kitchen, Robomimic, LIBERO, ManiSkill, MetaWorld) across diverse model scales (3M to 3B), 
-we discover that these hyperparameters are critical to RL's success:
+we discover that these hyperparameters are critical to RL's success, especially in visual manipulation from sparse reward: 
 * `SFT success rate`. RL cannot train visual manipulation policies easily from scratch, so try to optimize your SFT success rate before starting RL. The stronger your SFT is, the easier it will be for RL. 
 * `Noise level`. When the SFT success rate is low, tune down noise to [0.04, 0.10] or [0.05, 0.12] to avoid too much erroneous behaviors in early-stage exploration.
   When the SFT success rate is high, relax the noise logvariance to [0.08, 0.16] is usually a good practice. 
