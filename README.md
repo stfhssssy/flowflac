@@ -143,7 +143,7 @@ This repository was developed from multiple open-source projects. Major referenc
 - [Shortcut Models, Francs et al.](https://github.com/kvfrans/shortcut-models): One-step Diffusion via Shortcut Models. 
 - [DPPO, Ren et al.](https://github.com/irom-princeton/dppo): DPPO official implementation.  
 
-We also thank our collaborators from the open-source RL infrastructure project [RLinf](https://github.com/RLinf/RLinf) for their generous support, which enabled large-scale testing of ReinFlow with models of up to 3 billion parameters in up to 320 parallel visual manipulation environments. 
+We also thank our collaborators from the open-source RL infrastructure project [RLinf](https://github.com/RLinf/RLinf) for their generous support, which enabled scaling ReinFlow to models of up to 3 billion parameters across 320 parallel visual manipulation environments.  
 
 For more references, please refer to [Acknowledgement.md](docs/Acknowledgement.md).
 
