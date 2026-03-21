@@ -116,7 +116,7 @@ Please refer to [Implement.md](docs/Implement.md) for descriptions of key hyperp
 ## :rocket: Adding Your Own Dataset or Environment
 Please refer to [Custom.md](docs/Custom.md).
 
-## :rocket: Debug Aid and Known Issues
+## :rocket: Troubleshooting
 Please refer to [KnownIssues.md](docs/KnownIssues.md) to see how to resolve errors you encounter.
 
 ## :rocket: Tips on Hyperparameter Tuning
