@@ -174,15 +174,17 @@ class RobomimicImageWrapper(gym.Env):
     def step(self, action):
         if self.normalize:
             action = self.unnormalize_action(action)
-        raw_obs, reward, done, info = self.env.step(action)
+        raw_obs, reward, terminated, info = self.env.step(action)
         obs = self.get_observation(raw_obs)
+        truncated = self.env.env._check_success()
+        done = terminated or truncated
 
         # render if specified
         if self.video_writer is not None:
             video_img = self.render(mode="rgb_array")
             self.video_writer.append_data(video_img)
 
-        return obs, reward, False, info
+        return obs, reward, done, info
 
     # def render(self, mode="rgb_array"):
     #     h, w = self.render_hw

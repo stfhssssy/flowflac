@@ -54,6 +54,8 @@ class TrainAgent:
                 wandb_dir = cfg.wandb.get("dir", "./wandb")
             
             os.makedirs(wandb_dir, exist_ok=True)  # Ensure the directory exists
+            wandb_id = cfg.wandb.get("id", None)
+            wandb_resume = cfg.wandb.get("resume", None)
             wandb.init(
                 entity=cfg.wandb.entity,
                 project=cfg.wandb.project,
@@ -61,6 +63,8 @@ class TrainAgent:
                 config=OmegaConf.to_container(cfg, resolve=True),
                 mode="offline" if offline_mode else "online",  # Switch to offline mode
                 dir=wandb_dir,  # Specify local directory for offline logs
+                id=wandb_id,
+                resume=wandb_resume,
             )
             # Get the exact subfolder for this run
             run_id = wandb.run.id  # Unique ID for the run
@@ -77,7 +81,10 @@ class TrainAgent:
             cfg.env.name,
             env_type=env_type,
             num_envs=cfg.env.n_envs,
-            asynchronous=True,
+            asynchronous=cfg.env.get("asynchronous", True),
+            async_context=cfg.env.get("async_context", None),
+            async_shared_memory=cfg.env.get("async_shared_memory", True),
+            async_daemon=cfg.env.get("async_daemon", True),
             max_episode_steps=cfg.env.max_episode_steps,
             wrappers=cfg.env.get("wrappers", None),
             robomimic_env_cfg_path=cfg.get("robomimic_env_cfg_path", None),
@@ -85,6 +92,7 @@ class TrainAgent:
             use_image_obs=cfg.env.get("use_image_obs", False),
             render=cfg.env.get("render", False),
             render_offscreen=cfg.env.get("save_video", False),
+            render_gpu_devices=cfg.env.get("render_gpu_devices", None),
             obs_dim=cfg.obs_dim,
             action_dim=cfg.action_dim,
             **cfg.env.specific if "specific" in cfg.env else {},

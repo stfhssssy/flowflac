@@ -25,19 +25,18 @@
 Launcher for all experiments. Download pre-training data, normalization statistics, and pre-trained checkpoints if needed.
 Revised by ReinFlow Authors to accomodate resume training and fixing the kitchen tasks import error.
 """
-# clear python cache automatically.
-from util.clear_pycache import clean_pycache
-from util.dirs import REINFLOW_DIR
-clean_pycache(directory=REINFLOW_DIR)
+import os
 
-# register kitchen tasks in advance. prevent env not found error. 
-import gym
-import d4rl.gym_mujoco
+# Set headless rendering defaults before importing gym / mujoco / robomimic stacks.
+# Callers can still override these environment variables before launching.
+os.environ.setdefault("D4RL_SUPPRESS_IMPORT_ERROR", "1")
+os.environ.setdefault("MUJOCO_GL", "egl")
+os.environ.setdefault("PYOPENGL_PLATFORM", "egl")
+os.environ.setdefault("MUJOCO_EGL_DEVICE_ID", "0")
 
 import gc
 gc.collect()
 
-import os
 import sys
 import logging
 import math
@@ -54,15 +53,24 @@ OmegaConf.register_new_resolver("eval", eval, replace=True)
 OmegaConf.register_new_resolver("round_up", math.ceil)
 OmegaConf.register_new_resolver("round_down", math.floor)
 
-# suppress d4rl import error
-os.environ["D4RL_SUPPRESS_IMPORT_ERROR"] = "1"
-
 # add logger
 log = logging.getLogger(__name__)
 
 # use line-buffering for both stdout and stderr
 sys.stdout = open(sys.stdout.fileno(), mode="w", buffering=1)
 sys.stderr = open(sys.stderr.fileno(), mode="w", buffering=1)
+
+
+def prepare_main_process():
+    # Keep launch-only side effects out of spawned multiprocessing workers.
+    from util.clear_pycache import clean_pycache
+    from util.dirs import REINFLOW_DIR
+
+    clean_pycache(directory=REINFLOW_DIR)
+
+    # Register kitchen tasks in advance. Prevent env-not-found errors.
+    import gym  # noqa: F401
+    import d4rl.gym_mujoco  # noqa: F401
 
 @hydra.main(
     version_base=None,
@@ -90,12 +98,13 @@ def main(cfg: OmegaConf):
             raise ValueError(f"Invalid sim_device: {sim_device}. Must be a numeric GPU index.")
 
         os.environ['MUJOCO_GL'] = 'egl'
+        os.environ['PYOPENGL_PLATFORM'] = 'egl'
+        os.environ['MUJOCO_EGL_DEVICE_ID'] = str(sim_device)
         os.environ['MUJOCO_sim_device_ID'] = str(sim_device)  # Convert to string for environment variable
         os.environ['sim_device_ID'] = str(sim_device)
         log.info(f"Set sim_device={sim_device} from cfg.")
     else:
-        os.environ['MUJOCO_GL'] = 'osmesa'
-        log.info("No EGL device specified in cfg, falling back to osmesa.")
+        log.info("No sim_device specified in cfg, using MUJOCO_GL=%s.", os.environ.get("MUJOCO_GL"))
 
     # For pre-training: download dataset if needed
     if "train_dataset_path" in cfg and not os.path.exists(cfg.train_dataset_path):
@@ -140,4 +149,5 @@ def main(cfg: OmegaConf):
 
 
 if __name__ == "__main__":
+    prepare_main_process()
     main()

@@ -91,10 +91,12 @@ class CriticObsAct(torch.nn.Module):
         use_layernorm=False,
         residual_tyle=False,
         double_q=True,
+        output_dim=1,
         **kwargs,
     ):
         super().__init__()
-        mlp_dims = [cond_dim + action_dim * action_steps] + mlp_dims + [1]
+        self.output_dim = output_dim
+        mlp_dims = [cond_dim + action_dim * action_steps] + mlp_dims + [output_dim]
         if residual_tyle:
             model = ResidualMLP
         else:
@@ -117,12 +119,15 @@ class CriticObsAct(torch.nn.Module):
         """
         cond: dict with key state/rgb; more recent obs at the end
             state: (B, To, Do)
+            or (B, num_feature) from an encoder
         action: (B, Ta, Da)
         """
-        B = len(cond["state"])
-
-        # flatten history
-        state = cond["state"].view(B, -1)
+        if isinstance(cond, dict):
+            B = len(cond["state"])
+            state = cond["state"].view(B, -1)
+        else:
+            B = len(cond)
+            state = cond
 
         # flatten action
         action = action.view(B, -1)
@@ -131,10 +136,14 @@ class CriticObsAct(torch.nn.Module):
         if hasattr(self, "Q2"):
             q1 = self.Q1(x)
             q2 = self.Q2(x)
-            return q1.squeeze(1), q2.squeeze(1)
+            if self.output_dim == 1:
+                return q1.squeeze(1), q2.squeeze(1)
+            return q1, q2
         else:
             q1 = self.Q1(x)
-            return q1.squeeze(1)
+            if self.output_dim == 1:
+                return q1.squeeze(1)
+            return q1
 
 
 class ViTCritic(CriticObs):
@@ -228,3 +237,96 @@ class ViTCritic(CriticObs):
             feat = self.compress.forward(feat, state)
         feat = torch.cat([feat, state], dim=-1)
         return super().forward(feat)
+
+
+class ViTCriticObsAct(CriticObsAct):
+    """ViT + MLP state-action double critic, Q(s, a)."""
+
+    def __init__(
+        self,
+        backbone,
+        cond_dim,
+        action_dim,
+        action_steps=1,
+        img_cond_steps=1,
+        spatial_emb=128,
+        dropout=0,
+        augment=False,
+        num_img=1,
+        **kwargs,
+    ):
+        mlp_obs_dim = spatial_emb * num_img + cond_dim
+        super().__init__(
+            cond_dim=mlp_obs_dim,
+            action_dim=action_dim,
+            action_steps=action_steps,
+            **kwargs,
+        )
+        self.backbone = backbone
+        self.num_img = num_img
+        self.img_cond_steps = img_cond_steps
+        if num_img > 1:
+            self.compress1 = SpatialEmb(
+                num_patch=self.backbone.num_patch,
+                patch_dim=self.backbone.patch_repr_dim,
+                prop_dim=cond_dim,
+                proj_dim=spatial_emb,
+                dropout=dropout,
+            )
+            self.compress2 = deepcopy(self.compress1)
+        else:
+            self.compress = SpatialEmb(
+                num_patch=self.backbone.num_patch,
+                patch_dim=self.backbone.patch_repr_dim,
+                prop_dim=cond_dim,
+                proj_dim=spatial_emb,
+                dropout=dropout,
+            )
+        if augment:
+            self.aug = RandomShiftsAug(pad=4)
+        self.augment = augment
+
+    def forward(
+        self,
+        cond: dict,
+        action,
+        no_augment=False,
+    ):
+        """
+        cond: dict with key state/rgb; more recent obs at the end
+            state: (B, To, Do)
+            rgb: (B, To, C, H, W)
+        action: (B, Ta, Da)
+        """
+        B, T_rgb, C, H, W = cond["rgb"].shape
+
+        state = cond["state"].view(B, -1)
+        rgb = cond["rgb"][:, -self.img_cond_steps :]
+
+        if self.num_img > 1:
+            rgb = rgb.reshape(B, T_rgb, self.num_img, 3, H, W)
+            rgb = einops.rearrange(rgb, "b t n c h w -> b n (t c) h w")
+        else:
+            rgb = einops.rearrange(rgb, "b t c h w -> b (t c) h w")
+
+        rgb = rgb.float()
+
+        if self.num_img > 1:
+            rgb1 = rgb[:, 0]
+            rgb2 = rgb[:, 1]
+            if self.augment and not no_augment:
+                rgb1 = self.aug(rgb1)
+                rgb2 = self.aug(rgb2)
+            feat1 = self.backbone(rgb1)
+            feat2 = self.backbone(rgb2)
+            feat1 = self.compress1.forward(feat1, state)
+            feat2 = self.compress2.forward(feat2, state)
+            feat = torch.cat([feat1, feat2], dim=-1)
+        else:
+            if self.augment and not no_augment:
+                rgb = self.aug(rgb)
+            feat = self.backbone(rgb)
+            feat = self.compress.forward(feat, state)
+
+        feat = torch.cat([feat, state], dim=-1)
+        return super().forward(feat, action)

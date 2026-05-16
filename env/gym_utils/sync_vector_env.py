@@ -209,6 +209,31 @@ class SyncVectorEnv(VectorEnv):
         """Close the environments."""
         [env.close() for env in self.envs]
 
+    def reset_arg(self, options_list, **kwargs):
+        if options_list is None:
+            options_list = [{} for _ in range(self.num_envs)]
+        assert len(options_list) == self.num_envs
+
+        self._terminates[:] = False
+        self._truncates[:] = False
+        observations = []
+        for env, options in zip(self.envs, options_list):
+            observations.append(env.reset(options=options))
+
+        self.observations = concatenate(
+            self.single_observation_space, observations, self.observations
+        )
+        return deepcopy(self.observations) if self.copy else self.observations
+
+    def reset_one_arg(self, env_ind, options=None):
+        observation = self.envs[env_ind].reset(options=options or {})
+        if isinstance(self.observations, dict):
+            for key, value in observation.items():
+                self.observations[key][env_ind] = value
+        else:
+            self.observations[env_ind] = observation
+        return deepcopy(observation) if self.copy else observation
+
     def _check_spaces(self):
         for env in self.envs:
             if not (env.observation_space == self.single_observation_space):

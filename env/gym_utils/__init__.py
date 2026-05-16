@@ -32,6 +32,9 @@ def make_async(
     env_name:str,
     num_envs=1,
     asynchronous=True,
+    async_context=None,
+    async_shared_memory=True,
+    async_daemon=True,
     wrappers=None,
     render=False,
     obs_dim=23,
@@ -52,6 +55,7 @@ def make_async(
     robomimic_env_cfg_path=None,
     use_image_obs=False,
     render_offscreen=False,
+    render_gpu_devices=None,
     reward_shaping=False,
     shape_meta=None,
     **kwargs,
@@ -152,7 +156,18 @@ def make_async(
     
 
     
-    def _make_env():
+    def _select_render_device(env_ind, env_meta):
+        if render_gpu_devices is None:
+            return int(os.environ.get("MUJOCO_EGL_DEVICE_ID", env_meta["env_kwargs"].get("render_gpu_device_id", 0)))
+        if isinstance(render_gpu_devices, str):
+            devices = [int(device.strip()) for device in render_gpu_devices.split(",") if device.strip()]
+        else:
+            devices = [int(device) for device in render_gpu_devices]
+        if len(devices) == 0:
+            raise ValueError("render_gpu_devices must contain at least one device id.")
+        return devices[env_ind % len(devices)]
+
+    def _make_env(env_ind=0):
         if robomimic_env_cfg_path is not None:
             obs_modality_dict = {
                 "low_dim": (
@@ -170,10 +185,15 @@ def make_async(
                 obs_modality_dict.pop("rgb")
             ObsUtils.initialize_obs_modality_mapping_from_dict(obs_modality_dict)
             if render_offscreen or use_image_obs:
-                os.environ[""] = "egl"
+                os.environ["MUJOCO_GL"] = "egl"
+                os.environ["PYOPENGL_PLATFORM"] = "egl"
             with open(robomimic_env_cfg_path, "r") as f:
                 env_meta = json.load(f)
             env_meta["reward_shaping"] = reward_shaping
+            if render_offscreen or use_image_obs:
+                render_device = _select_render_device(env_ind, env_meta)
+                os.environ["MUJOCO_EGL_DEVICE_ID"] = str(render_device)
+                env_meta["env_kwargs"]["render_gpu_device_id"] = render_device
             
             print(f"Robomimic env_meta={env_meta}")
             print(f"""Robomimic env_name={env_meta["env_name"]}""")
@@ -283,13 +303,16 @@ def make_async(
         }
         return MultiStep(env=env, n_obs_steps=wrappers.multi_step.n_obs_steps)
 
-    env_fns = [_make_env for _ in range(num_envs)]
+    env_fns = [lambda env_ind=env_ind: _make_env(env_ind) for env_ind in range(num_envs)]
     return (
         AsyncVectorEnv(
             env_fns,
             dummy_env_fn=(
                 dummy_env_fn if render or render_offscreen or use_image_obs else None
             ),
+            shared_memory=async_shared_memory,
+            context=async_context,
+            daemon=async_daemon,
             delay_init="avoiding" in env_name,  # add delay for D3IL initialization
         )
         if asynchronous
