@@ -1,0 +1,192 @@
+env_suite: robomimic
+env_name: can
+
+obs_dim: 9
+cond_steps: 1
+img_cond_steps: 1
+action_dim: 7
+horizon_steps: 4
+act_steps: 4
+
+defaults:
+  - _self_
+
+hydra:
+  run:
+    dir: ${logdir}
+
+_target_: agent.finetune.reinflow.train_residual_td3_flow_img_agent.TrainResidualTD3ImgFlowAgent
+
+name: ${env_name}_ft_residual_td3_reflow_mlp_img_ta${horizon_steps}_seed${seed}
+logdir: ${oc.env:REINFLOW_LOG_DIR}/robomimic/finetune/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+
+base_policy_path: ${oc.env:REINFLOW_LOG_DIR}/robomimic/pretrain/can/ReFlow/state_2000.pt
+robomimic_env_cfg_path: cfg/robomimic/env_meta/${env_name}-img.json
+normalization_path: ${oc.env:REINFLOW_DATA_DIR}/robomimic/${env_name}-img/normalization.npz
+
+seed: 42
+device: cuda:0
+sim_device: cuda:1
+
+shape_meta:
+  obs:
+    rgb:
+      shape: [3, 96, 96]
+    state:
+      shape: [9]
+  action:
+    shape: [7]
+
+env:
+  n_envs: 4
+  asynchronous: true
+  async_context: spawn
+  async_shared_memory: false
+  async_daemon: false
+  render_gpu_devices: [0, 1]
+  name: ${env_name}
+  best_reward_threshold_for_success: 1
+  max_episode_steps: 300
+  save_video: false
+  use_image_obs: true
+  wrappers:
+    robomimic_image:
+      normalization_path: ${normalization_path}
+      low_dim_keys: ['robot0_eef_pos',
+                     'robot0_eef_quat',
+                     'robot0_gripper_qpos']
+      image_keys: ['robot0_eye_in_hand_image']
+      shape_meta: ${shape_meta}
+    multi_step:
+      n_obs_steps: ${cond_steps}
+      n_action_steps: ${act_steps}
+      max_episode_steps: ${env.max_episode_steps}
+      reset_within_step: true
+
+wandb:
+  entity: ${oc.env:REINFLOW_WANDB_ENTITY}
+  project: robomimic-can-flac
+  run: ${now:%Y-%m-%d}_${now:%H-%M-%S}_${name}
+  offline_mode: false
+
+train:
+  n_train_itr: 151
+  n_steps: 75
+  n_steps_eval: 300
+  n_eval_episode: 20
+  force_train: false
+  batch_size: 256
+  replay_size: 200000
+  start_steps: 0
+  updates_per_step: 4
+  actor_update_interval: 4
+  target_update_interval: 1
+  gamma: 0.99
+  tau: 0.005
+  scale_reward_factor: 1.0
+  actor_lr: 1e-6
+  actor_weight_decay: 0
+  actor_max_grad_norm: 1.0
+  critic_lr: 1e-4
+  critic_weight_decay: 0
+  critic_max_grad_norm: 1.0
+  target_kinetic_mode: fixed
+  target_kinetic: 0.1
+  measure_kinetic_steps: 0
+  init_log_alpha: -2.0
+  auto_alpha: false
+  actor_q_coef: 1.0
+  bc_anchor_coef: 0.0
+  bc_anchor_decay: none
+
+  # residual-offpolicy-rl style schedule
+  learning_starts: 10000
+  critic_warmup_updates: 10000
+  random_action_noise_scale: 0.2
+  use_base_policy_for_warmup: true
+  stddev_max: 0.05
+  stddev_min: 0.05
+  stddev_step: 300000
+  stddev_clip: 0.3
+  target_stddev: 0.05
+  target_stddev_clip: 0.3
+  action_l2_weight: 0.0
+
+  skip_initial_eval: false
+  save_model_freq: 50
+  val_freq: 10
+  log_freq: 1
+  render:
+    freq: 10
+    num: 0
+
+model:
+  _target_: model.flow.ft_flac.residual_td3_flow.ResidualTD3Flow
+  device: ${device}
+  actor_policy_path: ${base_policy_path}
+  inference_steps: 1
+  horizon_steps: ${horizon_steps}
+  action_dim: ${action_dim}
+  act_min: -1
+  act_max: 1
+  randn_clip_value: 3.0
+  clip_intermediate_actions: true
+  final_squash: clamp
+  integration_method: euler
+  use_zero_noise_for_deterministic: false
+  distributional_critic: false
+  residual_hidden_dim: 256
+  residual_action_scale: 0.1
+  policy_gradient_type: mean
+
+  actor:
+    _target_: model.flow.mlp_flow.VisionFlowMLP
+    backbone:
+      _target_: model.common.vit.VitEncoder
+      obs_shape: ${shape_meta.obs.rgb.shape}
+      num_channel: ${eval:'3 * ${img_cond_steps}'}
+      img_h: ${shape_meta.obs.rgb.shape[1]}
+      img_w: ${shape_meta.obs.rgb.shape[2]}
+      cfg:
+        patch_size: 8
+        depth: 1
+        embed_dim: 128
+        num_heads: 4
+        embed_style: embed2
+        embed_norm: 0
+    augment: false
+    spatial_emb: 128
+    time_dim: 32
+    mlp_dims: [512, 512, 512]
+    residual_style: true
+    img_cond_steps: ${img_cond_steps}
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    horizon_steps: ${horizon_steps}
+    action_dim: ${action_dim}
+
+  critic:
+    _target_: model.common.critic.ViTCriticObsAct
+    spatial_emb: 128
+    augment: false
+    backbone:
+      _target_: model.common.vit.VitEncoder
+      obs_shape: ${shape_meta.obs.rgb.shape}
+      num_channel: ${eval:'3 * ${img_cond_steps}'}
+      img_h: ${shape_meta.obs.rgb.shape[1]}
+      img_w: ${shape_meta.obs.rgb.shape[2]}
+      cfg:
+        patch_size: 8
+        depth: 1
+        embed_dim: 128
+        num_heads: 4
+        embed_style: embed2
+        embed_norm: 0
+    img_cond_steps: ${img_cond_steps}
+    mlp_dims: [256, 256, 256]
+    activation_type: Mish
+    residual_tyle: true
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    action_dim: ${action_dim}
+    action_steps: ${horizon_steps}
+    double_q: true
+    output_dim: 1
