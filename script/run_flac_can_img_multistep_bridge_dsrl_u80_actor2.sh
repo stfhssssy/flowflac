@@ -12,16 +12,16 @@ echo "Writing tee log to ${TEE_LOG}"
 python3 script/run.py \
   --config-path=/home/ssy/ReinFlow/cfg/robomimic/finetune/can \
   --config-name=ft_flac_multistep_bridge_reflow_mlp_img \
-  name=can_ft_flac_multistep_bridge_reflow_mlp_img_s4_dsrl_u80_actor2_seed42 \
+  name=can_ft_flac_multistep_bridge_reflow_mlp_img_s4_dsrl_u80_actor2_w5c10a_seed42 \
   env.n_envs=4 \
   train.n_train_itr=1001 \
   train.n_eval_episode=50 \
   train.save_model_freq=20 \
   train.val_freq=10 \
-  train.base_policy_warmup_steps=75000 \
+  train.base_policy_warmup_steps=6000 \
   train.base_policy_warmup_noise=0.03 \
-  train.update_after_steps=75001 \
-  train.actor_update_after_steps=75001 \
+  train.update_after_steps=6001 \
+  train.actor_update_after_steps=12001 \
   train.updates_per_step=80 \
   train.actor_update_interval=2 \
   train.actor_lr=3e-6 \
