@@ -70,7 +70,10 @@ def prepare_main_process():
 
     # Register kitchen tasks in advance. Prevent env-not-found errors.
     import gym  # noqa: F401
-    import d4rl.gym_mujoco  # noqa: F401
+    try:
+        import d4rl.gym_mujoco  # noqa: F401
+    except ImportError:
+        log.info("d4rl is not installed; skipping d4rl gym_mujoco registration.")
 
 @hydra.main(
     version_base=None,

@@ -33,7 +33,7 @@ env:
 pi0:
   openpi_root: /home/ssy/ReinFlow/openpi
   config_name: pi0_libero
-  checkpoint_dir: s3://openpi-assets/checkpoints/pi0_libero
+  checkpoint_dir: gs://openpi-assets/checkpoints/pi0_libero
   deterministic_eval: false
 
 wandb:
@@ -84,4 +84,3 @@ model:
   critic_hidden_dim: 256
   act_min: -1
   act_max: 1
-
