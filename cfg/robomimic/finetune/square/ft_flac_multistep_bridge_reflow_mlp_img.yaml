@@ -73,8 +73,8 @@ wandb:
 
 train:
   n_train_itr: 151
-  n_steps: 75
-  n_steps_eval: 400
+  n_steps: 100
+  n_steps_eval: 100
   n_eval_episode: 20
   force_train: false
   batch_size: 64
