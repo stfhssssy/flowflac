@@ -203,24 +203,23 @@ class PPOBuffer:
             )
             if self.furniture_sparse_reward:
                 episode_best_reward = episode_reward
+                episode_success_reward = episode_best_reward
             else:
-                episode_best_reward = np.array(
-                    [
-                        np.max(reward_traj) / self.act_steps
-                        for reward_traj in reward_trajs_split
-                    ]
+                episode_success_reward = np.array(
+                    [np.max(reward_traj) for reward_traj in reward_trajs_split]
                 )
+                episode_best_reward = episode_success_reward / self.act_steps
             self.avg_episode_reward = np.mean(episode_reward)
             self.avg_best_reward = np.mean(episode_best_reward)
             self.success_rate = np.mean(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             
             # Calculate standard deviations
             self.std_episode_reward = np.std(episode_reward)
             self.std_best_reward = np.std(episode_best_reward)
             self.std_success_rate = np.std(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             
             # Calculate average length of valid episodes and its standard deviation
@@ -422,24 +421,23 @@ class PPODiffusionBufferGPU(PPODiffusionBuffer):
             
             if self.furniture_sparse_reward:  # For furniture tasks
                 episode_best_reward = episode_reward
+                episode_success_reward = episode_best_reward
             else:
-                episode_best_reward = np.array(
-                    [
-                        np.max(reward_traj) / self.act_steps
-                        for reward_traj in reward_trajs_split
-                    ]
+                episode_success_reward = np.array(
+                    [np.max(reward_traj) for reward_traj in reward_trajs_split]
                 )
+                episode_best_reward = episode_success_reward / self.act_steps
             # Compute metrics
             self.avg_episode_reward = np.mean(episode_reward)
             self.avg_best_reward = np.mean(episode_best_reward)
             self.success_rate = np.mean(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             # Calculate standard deviations
             self.std_episode_reward = np.std(episode_reward)
             self.std_best_reward = np.std(episode_best_reward)
             self.std_success_rate = np.std(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             # Calculate average length of valid episodes and its standard deviation
             episode_lengths = np.array([end - start + 1 for _, start, end in episodes_start_end])*self.act_steps # account for multiple steps
@@ -984,24 +982,23 @@ class PPOFlowBufferGPU(PPOFlowBuffer):
             
             if self.furniture_sparse_reward:  # For furniture tasks
                 episode_best_reward = episode_reward
+                episode_success_reward = episode_best_reward
             else:
-                episode_best_reward = np.array(
-                    [
-                        np.max(reward_traj) / self.act_steps
-                        for reward_traj in reward_trajs_split
-                    ]
+                episode_success_reward = np.array(
+                    [np.max(reward_traj) for reward_traj in reward_trajs_split]
                 )
+                episode_best_reward = episode_success_reward / self.act_steps
             # Compute metrics
             self.avg_episode_reward = np.mean(episode_reward)
             self.avg_best_reward = np.mean(episode_best_reward)
             self.success_rate = np.mean(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             # Calculate standard deviations
             self.std_episode_reward = np.std(episode_reward)
             self.std_best_reward = np.std(episode_best_reward)
             self.std_success_rate = np.std(
-                episode_best_reward >= self.best_reward_threshold_for_success
+                episode_success_reward >= self.best_reward_threshold_for_success
             )
             # Calculate average length of valid episodes and its standard deviation
             episode_lengths = np.array([end - start + 1 for _, start, end in episodes_start_end])*self.act_steps # account for multiple steps
@@ -1376,4 +1373,3 @@ class PPOFlowImgBufferGPU(PPOFlowBufferGPU):
             )
         # compute return
         self.returns_trajs = self.advantages_trajs + self.value_trajs
-

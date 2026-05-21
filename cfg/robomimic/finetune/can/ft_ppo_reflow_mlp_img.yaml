@@ -104,6 +104,7 @@ train:
   lr_schedule: fixed
   repeat_samples: true
   verbose: false
+  use_early_stop: false
   clip_intermediate_actions: true
   account_for_initial_stochasticity: true
 model:
