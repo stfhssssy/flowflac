@@ -88,7 +88,7 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
     The frozen base flow actor samples ``a_base``.  The trainable bridge starts
     from ``X_0 = a_base`` and integrates a zero-initialized velocity field:
 
-    ``X_{k+1} = X_k + dt * u_theta(obs_feat, a_base, X_k, z, t_k)``.
+    ``X_{k+1} = X_k + dt * u_theta(obs_feat, a_base, X_k, t_k)``.
 
     With zero final-layer initialization this is exactly the frozen base policy
     for any number of bridge steps.  The FLAC energy is only the trainable bridge
@@ -117,6 +117,8 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
             raise ValueError("bridge_steps must be >= 1.")
         self.bridge_time_dim = int(bridge_time_dim)
         self.bridge_velocity_scale = float(bridge_velocity_scale)
+        # Kept for backwards-compatible configs; the fixed-start bridge does
+        # not use a separate stochastic condition.
         self.bridge_noise_condition_scale = float(bridge_noise_condition_scale)
         self.time_embedding = SinusoidalTimeEmbedding(self.bridge_time_dim).to(self.device)
 
@@ -124,7 +126,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
             self.bridge_obs_dim
             + self.bridge_action_dim  # base action
             + self.bridge_action_dim  # current solver state
-            + self.bridge_action_dim  # stochastic condition
             + self.bridge_time_dim
         )
         self.bridge_net = BridgeVelocityMLP(
@@ -145,22 +146,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
             self.bridge_velocity_scale,
         )
 
-    def _sample_bridge_condition(
-        self,
-        a_base: Tensor,
-        deterministic: bool,
-        z: Optional[Tensor],
-    ) -> Tensor:
-        if z is not None:
-            return z.to(device=a_base.device, dtype=a_base.dtype)
-        if deterministic or self.bridge_noise_condition_scale <= 0:
-            return torch.zeros_like(a_base)
-        bridge_z = torch.randn_like(a_base) * self.bridge_noise_condition_scale
-        if self.randn_clip_value is not None:
-            clip_value = self.randn_clip_value * max(self.bridge_noise_condition_scale, 1e-8)
-            bridge_z = bridge_z.clamp(-clip_value, clip_value)
-        return bridge_z
-
     def sample(
         self,
         cond: Dict[str, Tensor],
@@ -173,7 +158,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
             obs_feat = self._encode_bridge_obs(cond).detach()
             a_base = a_base.detach()
 
-        bridge_z = self._sample_bridge_condition(a_base, deterministic=deterministic, z=z)
         batch_size = a_base.shape[0]
         dtype = a_base.dtype
         device = a_base.device
@@ -185,7 +169,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
         velocity_norm_sum = torch.zeros(batch_size, device=device, dtype=dtype)
 
         a_base_flat = a_base.flatten(1)
-        z_flat = bridge_z.flatten(1)
         for step in range(self.bridge_steps):
             t = torch.full((batch_size,), step * dt, device=device, dtype=dtype)
             t_emb = self.time_embedding(t)
@@ -194,7 +177,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
                     obs_feat,
                     a_base_flat,
                     x.flatten(1),
-                    z_flat,
                     t_emb,
                 ],
                 dim=-1,

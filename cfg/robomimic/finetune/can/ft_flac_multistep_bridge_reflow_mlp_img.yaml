@@ -135,7 +135,9 @@ model:
   bridge_steps: 4
   bridge_time_dim: 32
   bridge_velocity_scale: 0.2
-  bridge_noise_condition_scale: 1.0
+  # Accepted by the model for backwards-compatible configs, but ignored by the
+  # fixed-start bridge. The bridge input is f_theta(o, a_base, x_k, t_k).
+  bridge_noise_condition_scale: 0.0
 
   actor:
     _target_: model.flow.mlp_flow.VisionFlowMLP
