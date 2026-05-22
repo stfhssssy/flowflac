@@ -135,7 +135,6 @@ model:
   bridge_steps: 4
   bridge_time_dim: 32
   bridge_velocity_scale: 0.2
-  bridge_noise_condition_scale: 1.0
 
   actor:
     _target_: model.flow.mlp_flow.VisionFlowMLP
