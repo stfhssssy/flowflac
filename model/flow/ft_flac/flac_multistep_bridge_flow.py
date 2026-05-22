@@ -103,7 +103,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
         bridge_time_dim: int = 32,
         bridge_obs_dim: Optional[int] = None,
         bridge_velocity_scale: float = 0.2,
-        bridge_noise_condition_scale: float = 1.0,
         **kwargs,
     ):
         super().__init__(
@@ -117,9 +116,6 @@ class FLACMultiStepBridgeFlow(FLACBridgeFlow):
             raise ValueError("bridge_steps must be >= 1.")
         self.bridge_time_dim = int(bridge_time_dim)
         self.bridge_velocity_scale = float(bridge_velocity_scale)
-        # Kept for backwards-compatible configs; the fixed-start bridge does
-        # not use a separate stochastic condition.
-        self.bridge_noise_condition_scale = float(bridge_noise_condition_scale)
         self.time_embedding = SinusoidalTimeEmbedding(self.bridge_time_dim).to(self.device)
 
         bridge_input_dim = (

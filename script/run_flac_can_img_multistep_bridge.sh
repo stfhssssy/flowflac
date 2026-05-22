@@ -34,7 +34,6 @@ python3 script/run.py \
   train.exploration_noise=0.01 \
   model.bridge_steps=4 \
   model.bridge_velocity_scale=0.2 \
-  model.bridge_noise_condition_scale=1.0 \
   model.distributional_critic=false \
   model.critic.output_dim=1 \
   2>&1 | tee "${TEE_LOG}"

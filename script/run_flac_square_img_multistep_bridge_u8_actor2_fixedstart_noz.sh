@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="/home/ssy/ReinFlow"
+REPO_DIR="/home/ssy/flowflac"
 RUN_TAG="$(date +%Y%m%d_%H%M%S)_$$"
 TEE_LOG="/tmp/flac_square_img_multistep_bridge_u8_actor2_fixedstart_noz_${RUN_TAG}.log"
 
@@ -10,7 +10,7 @@ cd "${REPO_DIR}"
 echo "Writing tee log to ${TEE_LOG}"
 
 python3 script/run.py \
-  --config-path=/home/ssy/ReinFlow/cfg/robomimic/finetune/square \
+  --config-path=/home/ssy/flowflac/cfg/robomimic/finetune/square \
   --config-name=ft_flac_multistep_bridge_reflow_mlp_img \
   name=square_ft_flac_multistep_bridge_reflow_mlp_img_s4_u8_actor2_fixedstart_noz_seed42 \
   env.n_envs=50 \
@@ -34,7 +34,6 @@ python3 script/run.py \
   train.exploration_noise=0.03 \
   model.bridge_steps=4 \
   model.bridge_velocity_scale=0.3 \
-  model.bridge_noise_condition_scale=0.0 \
   model.distributional_critic=false \
   model.critic.output_dim=1 \
   2>&1 | tee "${TEE_LOG}"
