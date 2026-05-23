@@ -68,12 +68,9 @@ def prepare_main_process():
 
     clean_pycache(directory=REINFLOW_DIR)
 
-    # Register kitchen tasks in advance. Prevent env-not-found errors.
+    # Keep base gym available up front. Task-specific env registration
+    # happens later inside env.gym_utils when the actual env family is known.
     import gym  # noqa: F401
-    try:
-        import d4rl.gym_mujoco  # noqa: F401
-    except ImportError:
-        log.info("d4rl is not installed; skipping d4rl gym_mujoco registration.")
 
 @hydra.main(
     version_base=None,
