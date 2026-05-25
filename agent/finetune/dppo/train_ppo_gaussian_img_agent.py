@@ -168,16 +168,21 @@ class TrainPPOImgGaussianAgent(TrainPPOGaussianAgent):
                         for reward_traj in reward_trajs_split
                     ]
                 )
+                episode_best_reward_raw = np.array(
+                    [np.max(reward_traj) for reward_traj in reward_trajs_split]
+                )
                 avg_episode_reward = np.mean(episode_reward)
                 avg_best_reward = np.mean(episode_best_reward)
+                avg_best_reward_raw = np.mean(episode_best_reward_raw)
                 success_rate = np.mean(
-                    episode_best_reward >= self.best_reward_threshold_for_success
+                    episode_best_reward_raw >= self.best_reward_threshold_for_success
                 )
             else:
                 episode_reward = np.array([])
                 num_episode_finished = 0
                 avg_episode_reward = 0
                 avg_best_reward = 0
+                avg_best_reward_raw = 0
                 success_rate = 0
                 log.info("[WARNING] No episode completed within the iteration!")
 
@@ -416,9 +421,15 @@ class TrainPPOImgGaussianAgent(TrainPPOGaussianAgent):
                         wandb.log(
                             {
                                 "success rate - eval": success_rate,
+                                "eval/success_rate": success_rate,
+                                "eval/success rate": success_rate,
                                 "avg episode reward - eval": avg_episode_reward,
+                                "eval/avg_episode_reward": avg_episode_reward,
                                 "avg best reward - eval": avg_best_reward,
+                                "eval/avg_best_reward": avg_best_reward,
+                                "eval/avg_best_reward_raw": avg_best_reward_raw,
                                 "num episode - eval": num_episode_finished,
+                                "eval/num_episode": num_episode_finished,
                             },
                             step=self.itr,
                             commit=False,
@@ -426,6 +437,12 @@ class TrainPPOImgGaussianAgent(TrainPPOGaussianAgent):
                     run_results[-1]["eval_success_rate"] = success_rate
                     run_results[-1]["eval_episode_reward"] = avg_episode_reward
                     run_results[-1]["eval_best_reward"] = avg_best_reward
+                    run_results[-1]["eval/success_rate"] = success_rate
+                    run_results[-1]["eval/success rate"] = success_rate
+                    run_results[-1]["eval/avg_episode_reward"] = avg_episode_reward
+                    run_results[-1]["eval/avg_best_reward"] = avg_best_reward
+                    run_results[-1]["eval/avg_best_reward_raw"] = avg_best_reward_raw
+                    run_results[-1]["eval/num_episode"] = num_episode_finished
                 else:
                     log.info(
                         f"{self.itr}: step {cnt_train_step:8d} | loss {loss:8.4f} | pg loss {pg_loss:8.4f} | value loss {v_loss:8.4f} | bc loss {bc_loss:8.4f} | reward {avg_episode_reward:8.4f} | t:{time:8.4f}"
@@ -444,7 +461,13 @@ class TrainPPOImgGaussianAgent(TrainPPOGaussianAgent):
                                 "clipfrac": np.mean(clipfracs),
                                 "explained variance": explained_var,
                                 "avg episode reward - train": avg_episode_reward,
+                                "train/avg_episode_reward": avg_episode_reward,
+                                "train/avg_best_reward": avg_best_reward,
+                                "train/avg_best_reward_raw": avg_best_reward_raw,
+                                "train/success_rate": success_rate,
+                                "train/success rate": success_rate,
                                 "num episode - train": num_episode_finished,
+                                "train/num_episode": num_episode_finished,
                                 "actor lr": self.actor_optimizer.param_groups[0]["lr"],
                                 "critic lr": self.critic_optimizer.param_groups[0][
                                     "lr"
@@ -454,6 +477,14 @@ class TrainPPOImgGaussianAgent(TrainPPOGaussianAgent):
                             commit=True,
                         )
                     run_results[-1]["train_episode_reward"] = avg_episode_reward
+                    run_results[-1]["train/avg_episode_reward"] = avg_episode_reward
+                    run_results[-1]["train/avg_best_reward"] = avg_best_reward
+                    run_results[-1]["train/avg_best_reward_raw"] = avg_best_reward_raw
+                    run_results[-1]["train/success_rate"] = success_rate
+                    run_results[-1]["train/success rate"] = success_rate
+                    run_results[-1]["train/num_episode"] = num_episode_finished
+                    run_results[-1]["train/total env step"] = cnt_train_step
+                    run_results[-1]["train/total_env_step"] = cnt_train_step
                 with open(self.result_path, "wb") as f:
                     pickle.dump(run_results, f)
             self.itr += 1

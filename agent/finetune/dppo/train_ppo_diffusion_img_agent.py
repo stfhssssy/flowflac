@@ -178,16 +178,21 @@ class TrainPPOImgDiffusionAgent(TrainPPODiffusionAgent):
                         for reward_traj in reward_trajs_split
                     ]
                 )
+                episode_best_reward_raw = np.array(
+                    [np.max(reward_traj) for reward_traj in reward_trajs_split]
+                )
                 avg_episode_reward = np.mean(episode_reward)
                 avg_best_reward = np.mean(episode_best_reward)
+                avg_best_reward_raw = np.mean(episode_best_reward_raw)
                 success_rate = np.mean(
-                    episode_best_reward >= self.best_reward_threshold_for_success
+                    episode_best_reward_raw >= self.best_reward_threshold_for_success
                 )
             else:
                 episode_reward = np.array([])
                 num_episode_finished = 0
                 avg_episode_reward = 0
                 avg_best_reward = 0
+                avg_best_reward_raw = 0
                 success_rate = 0
                 log.info("[WARNING] No episode completed within the iteration!")
 
@@ -454,17 +459,30 @@ class TrainPPOImgDiffusionAgent(TrainPPODiffusionAgent):
                     if self.use_wandb:
                         wandb.log(
                             {
+                                "eval/success_rate": success_rate,
+                                "eval/success rate": success_rate,
+                                "eval/avg_episode_reward": avg_episode_reward,
+                                "eval/avg_best_reward": avg_best_reward,
+                                "eval/avg_best_reward_raw": avg_best_reward_raw,
+                                "eval/num_episode": num_episode_finished,
                                 "success rate - eval": success_rate,
                                 "avg episode reward - eval": avg_episode_reward,
                                 "avg best reward - eval": avg_best_reward,
+                                "avg best reward raw - eval": avg_best_reward_raw,
                                 "num episode - eval": num_episode_finished,
                             },
                             step=self.itr,
                             commit=False,
                         )
                     run_results[-1]["eval_success_rate"] = success_rate
+                    run_results[-1]["eval/success_rate"] = success_rate
+                    run_results[-1]["eval/success rate"] = success_rate
                     run_results[-1]["eval_episode_reward"] = avg_episode_reward
+                    run_results[-1]["eval/avg_episode_reward"] = avg_episode_reward
                     run_results[-1]["eval_best_reward"] = avg_best_reward
+                    run_results[-1]["eval/avg_best_reward"] = avg_best_reward
+                    run_results[-1]["eval_best_reward_raw"] = avg_best_reward_raw
+                    run_results[-1]["eval/avg_best_reward_raw"] = avg_best_reward_raw
                 else:
                     log.info(
                         f"\nitr {self.itr}: step {cnt_train_step:8d} | reward {avg_episode_reward:8.4f} | t:{time:8.4f} \n"
@@ -474,6 +492,13 @@ class TrainPPOImgDiffusionAgent(TrainPPODiffusionAgent):
                     if self.use_wandb:
                         wandb.log(
                             {
+                                "train/success_rate": success_rate,
+                                "train/success rate": success_rate,
+                                "train/avg_episode_reward": avg_episode_reward,
+                                "train/avg_best_reward": avg_best_reward,
+                                "train/avg_best_reward_raw": avg_best_reward_raw,
+                                "train/num_episode": num_episode_finished,
+                                "train/total env step": cnt_train_step,
                                 "total env step": cnt_train_step,
                                 "loss": loss,
                                 "pg loss": pg_loss,
@@ -494,7 +519,16 @@ class TrainPPOImgDiffusionAgent(TrainPPODiffusionAgent):
                             step=self.itr,
                             commit=True,
                         )
+                    run_results[-1]["train_success_rate"] = success_rate
+                    run_results[-1]["train/success_rate"] = success_rate
+                    run_results[-1]["train/success rate"] = success_rate
                     run_results[-1]["train_episode_reward"] = avg_episode_reward
+                    run_results[-1]["train/avg_episode_reward"] = avg_episode_reward
+                    run_results[-1]["train_best_reward"] = avg_best_reward
+                    run_results[-1]["train/avg_best_reward"] = avg_best_reward
+                    run_results[-1]["train_best_reward_raw"] = avg_best_reward_raw
+                    run_results[-1]["train/avg_best_reward_raw"] = avg_best_reward_raw
+                    run_results[-1]["train/num_episode"] = num_episode_finished
                 with open(self.result_path, "wb") as f:
                     pickle.dump(run_results, f)
             self.itr += 1
