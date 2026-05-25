@@ -79,8 +79,8 @@ train:
   replay_size: 20000
   start_steps: 0
   actor_update_after_steps: 0
-  updates_per_step: 1
-  actor_update_interval: 50
+  updates_per_step: 2 #1
+  actor_update_interval: 25 #50
   target_update_interval: 2
   gamma: 0.999
   tau: 0.005
@@ -124,10 +124,6 @@ model:
   final_squash: clamp
   integration_method: euler
   use_zero_noise_for_deterministic: false
-  distributional_critic: false
-  critic_num_atoms: 101
-  critic_v_min: -150.0
-  critic_v_max: 150.0
 
   actor:
     _target_: model.flow.mlp_flow.VisionFlowMLP
@@ -179,4 +175,3 @@ model:
     action_dim: ${action_dim}
     action_steps: ${horizon_steps}
     double_q: true
-    output_dim: 1
