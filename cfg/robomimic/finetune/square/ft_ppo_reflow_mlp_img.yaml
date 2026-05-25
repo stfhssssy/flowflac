@@ -110,6 +110,7 @@ train:
   clip_intermediate_actions: true
   account_for_initial_stochasticity: true
   max_grad_norm: 25.0
+  use_early_stop: false
 model:
   _target_: model.flow.ft_ppo.ppoflow.PPOFlow
   device: ${device}
