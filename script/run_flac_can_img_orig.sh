@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="/home/ssy/ReinFlow"
 RUN_TAG="$(date +%Y%m%d_%H%M%S)_$$"
 TEE_LOG="/tmp/flac_can_img_orig_${RUN_TAG}.log"
-
-cd "${REPO_DIR}"
 
 echo "Writing tee log to ${TEE_LOG}"
 
@@ -14,11 +11,9 @@ python3 script/run.py \
   --config-name=ft_flac_reflow_mlp_img \
   name=can_ft_flac_reflow_mlp_img_orig_seed42 \
   env.n_envs=50 \
-  train.n_train_itr=151 \
+  train.n_train_itr=10000 \
   train.n_eval_episode=50 \
   train.measure_kinetic_steps=5000 \
   train.updates_per_step=1 \
   train.actor_update_interval=50 \
-  model.distributional_critic=false \
-  model.critic.output_dim=1 \
   2>&1 | tee "${TEE_LOG}"
