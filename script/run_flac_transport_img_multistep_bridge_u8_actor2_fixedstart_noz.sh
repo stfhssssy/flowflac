@@ -1,16 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="/home/ssy/ReinFlow"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_TAG="$(date +%Y%m%d_%H%M%S)_$$"
 TEE_LOG="/tmp/flac_transport_img_multistep_bridge_u8_actor2_fixedstart_noz_${RUN_TAG}.log"
+MUJOCO_BIN="${MUJOCO_BIN:-$HOME/.mujoco/mujoco210/bin}"
+NVIDIA_LIB_DIR="${NVIDIA_LIB_DIR:-/usr/lib/nvidia}"
 
 cd "${REPO_DIR}"
 
 echo "Writing tee log to ${TEE_LOG}"
 
+append_ld_library_path() {
+  local lib_dir="$1"
+  if [ -d "${lib_dir}" ]; then
+    if [ -n "${LD_LIBRARY_PATH:-}" ]; then
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${lib_dir}"
+    else
+      export LD_LIBRARY_PATH="${lib_dir}"
+    fi
+  fi
+}
+
+append_ld_library_path "${MUJOCO_BIN}"
+append_ld_library_path "${NVIDIA_LIB_DIR}"
+
 python3 script/run.py \
-  --config-path=/home/ssy/ReinFlow/cfg/robomimic/finetune/transport \
+  --config-path="${REPO_DIR}/cfg/robomimic/finetune/transport" \
   --config-name=ft_flac_multistep_bridge_reflow_mlp_img \
   name=transport_ft_flac_multistep_bridge_reflow_mlp_img_s4_u8_actor2_fixedstart_noz_seed42 \
   env.n_envs=50 \
@@ -36,4 +52,5 @@ python3 script/run.py \
   model.bridge_velocity_scale=0.3 \
   model.distributional_critic=false \
   model.critic.output_dim=1 \
+  "$@" \
   2>&1 | tee "${TEE_LOG}"
